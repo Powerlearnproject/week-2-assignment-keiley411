@@ -126,7 +126,7 @@ WHERE category = 'Transportation' OR category = 'Health';
 
 -- using NOT operator
 SELECT * FROM Expenses
-WHERE NOT category = 'Rent';
+WHERE category NOT LIKE '%Rent%';
 
 -- sorting retrived data
 -- by amount using ORDER BY from descending to ascending 
