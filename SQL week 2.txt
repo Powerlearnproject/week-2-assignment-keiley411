@@ -1,0 +1,157 @@
+-- Create the database (adjust the name if needed)
+CREATE DATABASE IF NOT EXISTS expense_tracker;
+
+-- Use the expense_tracker database
+USE expense_tracker;
+
+-- Create the Expenses table
+CREATE TABLE IF NOT EXISTS Expenses (
+  expense_id INT PRIMARY KEY AUTO_INCREMENT,
+  amount DECIMAL(10,2) NOT NULL,
+  date DATE NOT NULL,
+  category VARCHAR(50) NOT NULL
+);
+
+-- Function to generate random date within a specific range (modify as needed)
+DELIMITER //
+
+CREATE FUNCTION GetRandomDate(startDate DATE, endDate DATE)
+RETURNS DATE
+READS SQL DATA
+DETERMINISTIC
+BEGIN
+  DECLARE randomDays INT;
+  SET randomDays = FLOOR(RAND() * (DATEDIFF(endDate, startDate) + 1));
+  RETURN DATE_ADD(startDate, INTERVAL randomDays DAY);
+END; //
+
+DELIMITER ;
+
+-- Stored Procedure to insert sample data with random dates and categories (categories can be modified)
+DELIMITER //
+
+CREATE PROCEDURE InsertSampleData()
+BEGIN
+  DECLARE counter INT DEFAULT 1;
+
+  WHILE counter <= 20 DO
+    INSERT INTO Expenses (amount, date, category)
+    VALUES (FLOOR(10 + RAND() * 100),
+            GetRandomDate(DATE_SUB(CURDATE(), INTERVAL 4 YEAR), CURDATE()),  -- Random date within the last 4 years
+            CASE WHEN counter % 4 = 0 THEN 'Groceries'
+                 WHEN counter % 4 = 1 THEN 'Entertainment'
+                 WHEN counter % 4 = 2 THEN 'Transportation'
+                 ELSE 'Other'
+            END);
+    SET counter = counter + 1;
+  END WHILE;
+END; //
+
+DELIMITER ;
+
+-- Call the procedure to insert sample data
+CALL InsertSampleData();
+
+-- Drop the functions and procedures if they are no longer needed
+DROP PROCEDURE IF EXISTS InsertSampleData;
+DROP FUNCTION IF EXISTS GetRandomDate;
+
+
+
+USE expense_tracker;
+CREATE TABLE Expenses(
+	expense_id INT AUTO_INCREMENT PRIMARY KEY,
+    amount DECIMAL(5, 2) NOT NULL,
+    date DATE NOT NULL,
+    category VARCHAR(255) NOT NULL,
+    description TEXT
+);
+ALTER TABLE Expenses MODIFY COLUMN amount DECIMAL(15,2);
+
+INSERT INTO Expenses (expense_id, amount, date, category, description)
+	VALUES
+    (101, 1500.50, '2023-01-15', 'Groceries', 'Bought groceries for the week'),
+	(102, 2500.50, '2023-06-26', 'Transportation', 'Traveled to Nairobi for a conference'),
+    (103, 17500.50, '2023-01-15', 'Health', 'Paid bill hospital for surgery'),
+	(104, 7500.50, '2023-01-15', 'Housing', 'Paid monthly rent'),
+	(105, 700.00, '2023-02-02', 'Utilities', 'Paid electricity bill'),
+    (106, 1000.00, '2023-03-10', 'Entertainment', 'Bought concert tickets'),
+    (107, 6000.00, '2023-04-05', 'Shopping', 'Bought new clothes'),
+    (108, 75000.00, '2023-05-20', 'Dining', 'Had dinner at a restaurant'),
+    (109, 500.00, '2023-07-01', 'Groceries', 'Weekly grocery shopping'),
+    (110, 1200.75, '2023-06-05', 'Transportation', 'Monthly bus pass'),
+    (111, 15000.00, '2024-06-10', 'Health', 'Dental check-up and cleaning'),
+    (112, 8000.00, '2024-07-15', 'Housing', 'Paid rent for July'),
+    (113, 450.00, '2024-07-20', 'Utilities', 'Water bill payment'),
+    (114, 2000.00, '2024-07-25', 'Entertainment', 'Bought new video games'),
+    (115, 4000.00, '2024-07-30', 'Shopping', 'Purchased summer clothing'),
+    (116, 8000.00, '2024-08-01', 'Dining', 'Birthday dinner at a fancy restaurant'),
+    (117, 300.00, '2024-08-05', 'Groceries', 'Mid-week grocery shopping'),
+    (118, 1000.00, '2024-08-10', 'Transportation', 'Car maintenance and repair'),
+    (119, 2000.50, '2024-09-22', 'Dining', 'Date night with friends'),
+    (120, 10000.00, '2024-12-21', 'Shopping', 'Bought 2 pairs of shoes');
+
+-- Retriving all columns from Expense table
+SELECT * FROM Expenses;
+
+-- Analyzing spending patterns by category and date 
+SELECT date, category, SUM(amount) AS total_spent
+FROM Expenses
+GROUP BY date, category
+ORDER BY date, category;
+
+-- Filtering by Date Range
+-- Retriving expenses between Jan 01,2023 to Dec 12, 2024
+SELECT * FROM Expenses 
+WHERE  date >= '2023-06-26' 
+AND date <= '2024-07-30';
+
+-- Filtering with WHERE CLAUSE
+-- find all expenses by category
+SELECT * FROM Expenses
+WHERE category = 'Transportation';
+
+-- expenses with amount greater than 1000
+SELECT * FROM Expenses
+WHERE amount > 6000;
+
+-- using AND query - expenses that meet multiple criteria
+SELECT * FROM Expenses
+WHERE amount = 1000
+AND category ='Entertainment';
+
+-- using OR operator
+SELECT * FROM Expenses
+WHERE category = 'Transportation' OR category = 'Health';
+
+-- using NOT operator
+SELECT * FROM Expenses
+WHERE NOT category = 'Rent';
+
+-- sorting retrived data
+-- by amount using ORDER BY from descending to ascending 
+SELECT * FROM Expenses
+ORDER BY amount DESC;
+
+-- sorting expenses on multiple columns
+-- sort by first date(desc-asc)
+SELECT * FROM Expenses
+ORDER BY date DESC;
+-- sort by category (asc-desc)
+SELECT * FROM Expenses
+ORDER BY category ASC;
+
+-- DATABASE UPGRADE
+-- CREATING INCOME TABLE
+CREATE TABLE Income(
+	income_id INT AUTO_INCREMENT PRIMARY KEY,
+    amount DECIMAL(10,2) NOT NULL,
+    date DATE NOT NULL,
+    source VARCHAR(50) NOT NULL
+    );
+ALTER TABLE Income ADD COLUMN category VARCHAR(50);
+ALTER TABLE Income DROP COLUMN source;
+-- using DROP TABLE 
+DROP TABLE Income;
+
+    
